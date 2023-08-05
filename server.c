@@ -9,16 +9,28 @@
 
 // takes a filename and lines to read, returns a string with read data
 // reallocates memory for content so the output fits perfectly within
-void get_text_from_file(char* content, const char* filename, unsigned int max_lines_to_read) {
+void get_text_from_file(char* content, unsigned int max_bytes_to_read, const char* filename) {
     // reading the html file for testing
     FILE* file_ptr;
     file_ptr = fopen(filename, "r");
     // hold the values for a single line
     char line[MAX_READ_LINE_LENGTH]; 
     // iterating over file to read all lines
-    while (max_lines_to_read > 0 && fgets(line, MAX_READ_LINE_LENGTH, file_ptr)) {
-        strcat(content, line);
-        max_lines_to_read--; 
+    while (fgets(line, MAX_READ_LINE_LENGTH, file_ptr)) {
+        // checking if line will fit into content
+        if (strlen(content) + strlen(line) + 1 < max_bytes_to_read) { // +1 for termination character
+            strcat(content, line);
+        }
+        else {
+            // fill array but no more
+            char buff[max_bytes_to_read];
+            strcpy(buff, "");
+            int bytes_to_read = max_bytes_to_read - strlen(content) - 1;
+            strncpy(buff, line, bytes_to_read);
+            strcat(content, buff);
+
+            break; // no more space in char array
+        }
     };
     // cleaning up
     fclose(file_ptr);
@@ -26,8 +38,8 @@ void get_text_from_file(char* content, const char* filename, unsigned int max_li
 
 int main(void) {
     // getting test html from file
-    char content[1024] = ""; // TODO: make this dynamically sized so that it perfectly fits the html
-    get_text_from_file(content, "html/Home.html", 128); // 128 is arbitrary
+    char content[1024] = ""; // this should be a big enough buffer, defaulting to empty because we are appending
+    get_text_from_file(content, 1024, "html/Home.html");
     // printf(content);
     // printf("\n\n"); // no new line at the end of file so we add extras
 
@@ -78,14 +90,17 @@ int main(void) {
             closesocket(accepted_skt);
             continue;
         }
-        printf("Accepted socket.\n");
+        // printf("Accepted socket.\n");
 
         // sending data over accepted socket
         send(accepted_skt, content, sizeof(content), 0);
 
         // recieveing requests from accepted socket
         char request_buff[MAX_READ_LINE_LENGTH * 128]; // keep it in a big buffer for now
-        recv(accepted_skt, request_buff, sizeof(request_buff), 0); // TODO: do *something* with the request. 
+        int request_buff_size = recv(accepted_skt, request_buff, sizeof(request_buff), 0);
+        // reading buffer
+        printf("\n~~~~~~~~~~ REQUEST BUFFER ~~~~~~~~~~\n");
+        printf("%s", request_buff); // TODO: do something with this data maybe?
 
         // closing socket
         closesocket(accepted_skt);
@@ -96,5 +111,7 @@ int main(void) {
     WSACleanup();
 
     // cleanup
+    free(content);
+
     return 0;
 }
