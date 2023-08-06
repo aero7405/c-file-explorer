@@ -1,7 +1,7 @@
 @echo off
 if not exist build/ ( mkdir build )
-if not exist build\html/ ( mkdir build\html )
 robocopy .\html .\build\html /MIR > nul
+robocopy .\images .\build\images /MIR > nul
 cd build
-g++ ../server.c -o server.exe -lws2_32
+g++ ../server.c ../http_response.c ../file.c -o server.exe -lws2_32
 server.exe

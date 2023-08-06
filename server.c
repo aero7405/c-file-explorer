@@ -1,40 +1,14 @@
 #include <stdio.h>
+#include <string.h>
 #include <winsock2.h>
+
+#include "http_response.h"
+#include "file.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
 #define PORT 80
 #define LOCAL_HOST "127.0.0.1"
-#define MAX_READ_LINE_LENGTH 128
-
-// takes a filename and lines to read, returns a string with read data
-// reallocates memory for content so the output fits perfectly within
-void get_text_from_file(char* content, unsigned int max_bytes_to_read, const char* filename) {
-    // reading the html file for testing
-    FILE* file_ptr;
-    file_ptr = fopen(filename, "r");
-    // hold the values for a single line
-    char line[MAX_READ_LINE_LENGTH]; 
-    // iterating over file to read all lines
-    while (fgets(line, MAX_READ_LINE_LENGTH, file_ptr)) {
-        // checking if line will fit into content
-        if (strlen(content) + strlen(line) + 1 < max_bytes_to_read) { // +1 for termination character
-            strcat(content, line);
-        }
-        else {
-            // fill array but no more
-            char buff[max_bytes_to_read];
-            strcpy(buff, "");
-            int bytes_to_read = max_bytes_to_read - strlen(content) - 1;
-            strncpy(buff, line, bytes_to_read);
-            strcat(content, buff);
-
-            break; // no more space in char array
-        }
-    };
-    // cleaning up
-    fclose(file_ptr);
-}
 
 int main(void) {
     // getting test html from file
@@ -56,7 +30,7 @@ int main(void) {
         WSACleanup();
         return 1;
     }
-    printf("Socket created.\n");
+    // printf("Socket created.\n");
 
     // creating socket address
     const char* local_IP = LOCAL_HOST;
@@ -76,7 +50,7 @@ int main(void) {
         WSACleanup();
         return 1;
     }
-    printf("Socket established at %s:%d\n", local_IP, PORT);
+    printf("Socket created at http://%s:%d\n", local_IP, PORT);
     printf("Listening to socket...\n");
 
     // accepting connections for a little bit
@@ -96,11 +70,15 @@ int main(void) {
         send(accepted_skt, content, sizeof(content), 0);
 
         // recieveing requests from accepted socket
-        char request_buff[MAX_READ_LINE_LENGTH * 128]; // keep it in a big buffer for now
+        char request_buff[1024]; // keep it in a big buffer for now
         int request_buff_size = recv(accepted_skt, request_buff, sizeof(request_buff), 0);
-        // reading buffer
-        printf("\n~~~~~~~~~~ REQUEST BUFFER ~~~~~~~~~~\n");
-        printf("%s", request_buff); // TODO: do something with this data maybe?
+        // convert request_buff into usable data
+        HTTP_Response request = get_response_data(request_buff, sizeof(request_buff));
+        // TEMP: printing request
+        printf("\nHTTP Method: %d\n", request.method);
+        printf("Accept: %d\n", request.accept);
+        printf("Resource Path: %s\n", request.resource_path);
+        // TODO: send resources requested
 
         // closing socket
         closesocket(accepted_skt);
@@ -111,7 +89,5 @@ int main(void) {
     WSACleanup();
 
     // cleanup
-    free(content);
-
     return 0;
 }
