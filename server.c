@@ -10,6 +10,11 @@
 #define PORT 80
 #define LOCAL_HOST "127.0.0.1"
 
+/*
+ * NOTE:
+ *  For now server.c is the main file as I work out running the server
+ *  This will change in future as development shifts to focus on the file explorer aspects
+ */
 int main(void) {
     // getting test html from file
     char content[1024] = ""; // this should be a big enough buffer, defaulting to empty because we are appending

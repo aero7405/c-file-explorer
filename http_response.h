@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 typedef enum HTTP_Method {
-    NONE, // just ignore the request if set to this
+    NONE,
     GET, 
     POST,
 } HTTP_Method;
