@@ -18,12 +18,6 @@
  *  This will change in future as development shifts to focus on the file explorer aspects
  */
 int main(void) {
-    // getting test html from file
-    char* html_buff;
-    int html_buff_size = get_from_file(&html_buff, "resources/index.html");
-    // printf(html_buff);
-    // printf("\n\n"); // no new line at the end of file so we add extras
-
     // initialising 
     WSADATA wsa_data;
     WSAStartup(MAKEWORD(2,2), &wsa_data); // MAKEWORD(2,2) calls for v2.2 of winsock
