@@ -10,6 +10,7 @@
 
 #define PORT 80
 #define LOCAL_HOST "127.0.0.1"
+#define RESOURCES_DIR "resources/"
 
 /*
  * NOTE:
@@ -19,7 +20,7 @@
 int main(void) {
     // getting test html from file
     char* html_buff;
-    int html_buff_size = get_from_file(&html_buff, "html/index.html");
+    int html_buff_size = get_from_file(&html_buff, "resources/index.html");
     // printf(html_buff);
     // printf("\n\n"); // no new line at the end of file so we add extras
 
@@ -82,14 +83,29 @@ int main(void) {
         printf("Accept: %d\n", request.accept);
         printf("Resource Path: %s\n", request.resource_path);
 
-        if (strcmp(request.resource_path, "/images/walm.png") == 0) {
-            char* buff;
-            int buff_size = get_from_file(&buff, "images/walm.png");
-            send(accepted_skt, buff, buff_size, 0);
+        // special case as "" is actually "index.html"
+        if (strcmp(request.resource_path, "") == 0) { 
+            // resource_path should be 64 bytes so this is safe
+            strcpy(request.resource_path, "index");
         }
-        else {
-            // sending data over accepted socket
-            send(accepted_skt, html_buff, (size_t)html_buff_size, 0);
+        // special case for html files so we don't have to end pages in ".html"
+        if (request.accept == HTTP_HTML) {
+            char html_extension[6] = ".html";
+            strcat(request.resource_path, html_extension);
+        }
+        // checking http method
+        if (request.method == HTTP_GET) {
+            // sending requested files
+            char* buff;
+            char prefix_dir[] = RESOURCES_DIR;
+            int buff_size = get_from_file(&buff, strcat(prefix_dir, request.resource_path));
+            // checking valid buffer
+            if (buff_size > 0) { // no errors encountered
+                send(accepted_skt, buff, buff_size, 0);
+            }
+            else {
+                printf("WARNING: Failed to get \"%s\".\n", request.resource_path);
+            }
         }
 
         // closing socket

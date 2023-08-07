@@ -4,17 +4,15 @@
 #include <stdio.h>
 
 typedef enum HTTP_Method {
-    NONE,
-    GET, 
-    POST,
+    HTTP_NO_METHOD,
+    HTTP_GET,
+    HTTP_POST,
 } HTTP_Method;
 
 typedef enum HTTP_Accept_Types {
-    TEXT,
-    STYLESHEET,
-    IMAGE,
-    HTML,
-    JAVASCRIPT,
+    HTTP_NO_ACCEPT_TYPE,
+    HTTP_HTML,
+    HTTP_RESOURCE,
 } HTTP_Accept_Types;
 
 typedef struct HTTP_Response {
