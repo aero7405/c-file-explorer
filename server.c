@@ -79,9 +79,9 @@ int main(void) {
         // convert request_buff into usable data
         HTTP_Response request = get_response_data(request_buff, sizeof(request_buff));
         
-        printf("\nHTTP Method: %d\n", request.method);
-        printf("Accept: %d\n", request.accept);
-        printf("Resource Path: %s\n", request.resource_path);
+        // printf("\nHTTP Method: %d\n", request.method);
+        // printf("Accept: %d\n", request.accept);
+        // printf("Resource Path: %s\n", request.resource_path);
 
         // special case as "" is actually "index.html"
         if (strcmp(request.resource_path, "") == 0) { 
