@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
 
@@ -17,9 +18,9 @@
  */
 int main(void) {
     // getting test html from file
-    char content[1024] = ""; // this should be a big enough buffer, defaulting to empty because we are appending
-    get_text_from_file(content, 1024, "html/Home.html");
-    // printf(content);
+    char* html_buff;
+    int html_buff_size = get_from_file(&html_buff, "html/index.html");
+    // printf(html_buff);
     // printf("\n\n"); // no new line at the end of file so we add extras
 
     // initialising 
@@ -71,19 +72,25 @@ int main(void) {
         }
         // printf("Accepted socket.\n");
 
-        // sending data over accepted socket
-        send(accepted_skt, content, sizeof(content), 0);
-
         // recieveing requests from accepted socket
         char request_buff[1024]; // keep it in a big buffer for now
         int request_buff_size = recv(accepted_skt, request_buff, sizeof(request_buff), 0);
         // convert request_buff into usable data
         HTTP_Response request = get_response_data(request_buff, sizeof(request_buff));
-        // TEMP: printing request
+        
         printf("\nHTTP Method: %d\n", request.method);
         printf("Accept: %d\n", request.accept);
         printf("Resource Path: %s\n", request.resource_path);
-        // TODO: send resources requested
+
+        if (strcmp(request.resource_path, "/images/walm.png") == 0) {
+            char* buff;
+            int buff_size = get_from_file(&buff, "images/walm.png");
+            send(accepted_skt, buff, buff_size, 0);
+        }
+        else {
+            // sending data over accepted socket
+            send(accepted_skt, html_buff, (size_t)html_buff_size, 0);
+        }
 
         // closing socket
         closesocket(accepted_skt);

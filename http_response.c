@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "http_response.h"
@@ -18,7 +19,7 @@ HTTP_Response get_response_data(char* response_buff, size_t response_buff_size) 
         if (response_buff[i] != '\n') {
             if (strlen(curr_line_buff) >= 1024) { // case we are adding outside of buffer
                 // throwing a fit because no line of text should be more than a kilobyte
-                printf("Response line read exceeded 1024 bytes! ");
+                printf("Response line read exceeded 1024 bytes!");
                 break;
             }
             curr_line_buff[strlen(curr_line_buff)] = response_buff[i];
@@ -40,7 +41,8 @@ HTTP_Response get_response_data(char* response_buff, size_t response_buff_size) 
                 response.method = GET;
                 // printf("->GET\n");
                 // getting the path of the resource to get
-                char resource_path[64]; // 64 is probably enough
+                // need to malloc otherwise the string itself will go out of scope
+                char* resource_path = (char*)malloc(64); // 64 is probably enough for file paths
                 strcpy(resource_path, curr_line_buff + 4);
                 // adding termination character at first space
                 *strchr(resource_path, ' ') = '\0';
