@@ -1,27 +1,28 @@
 CC			:= gcc
 
-LIBS		:= -Lws2_32
+LIBS		:= -lws2_32
 INCLUDES 	:= -Iinclude
 CFLAGS 		:= #-Wall
 
-TARGET 		:= c-file-explorer
-OBJFILES 	:= server.o http_response.o file.o
-
 SRC_DIR 	:= src
 INCLUDE_DIR := include
-OBJ_DIR		:= build/obj
-BIN_DIR		:= build/bin
+OBJ_DIR		:= obj
+
+TARGET 		:= c-file-explorer
+OBJ_FILES 	:= $(OBJ_DIR)/server.o $(OBJ_DIR)/http_response.o $(OBJ_DIR)/file.o
 
 all: $(TARGET)
+	@echo Running $(TARGET)...
+	@$(TARGET)
 
-$(TARGET): $(OBJFILES)
-	$(CC) $(CFLAGS) -o $(TARGET) $(EXEC_NAME) $(OBJFILES) $(LIBS)
+$(TARGET): $(OBJ_FILES)
+	$(CC) $(CFLAGS) $(OBJ_FILES) -o $(TARGET) $(LIBS)
 
-server.o: $(SRC_DIR)/server.c $(INCLUDE_DIR)/http_response.h $(INCLUDE_DIR)/file.h
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/server.c $(INCLUDES) $(LIBS)
+$(OBJ_DIR)/server.o: $(SRC_DIR)/server.c $(INCLUDE_DIR)/http_response.h $(INCLUDE_DIR)/file.h
+	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES) $(LIBS) 
 
-http_response.o: $(SRC_DIR)/http_response.c $(INCLUDE_DIR)/http_response.h
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/http_response.c $(INCLUDES) $(LIBS)
+$(OBJ_DIR)/http_response.o: $(SRC_DIR)/http_response.c $(INCLUDE_DIR)/http_response.h
+	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES) $(LIBS)
 
-file.o: $(SRC_DIR)/file.c $(INCLUDE_DIR)/file.h
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/file.c $(INCLUDES) $(LIBS)
+$(OBJ_DIR)/file.o: $(SRC_DIR)/file.c $(INCLUDE_DIR)/file.h
+	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES) $(LIBS)
