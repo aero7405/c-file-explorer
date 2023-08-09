@@ -7,7 +7,8 @@
 #include "http_response.h"
 #include "file.h"
 
-#pragma comment(lib, "ws2_32.lib")
+// This *was* needed at one point but linking with Make seems to have removed the need for it
+// #pragma comment(lib, "ws2_32.lib")
 
 #define PORT 80
 #define LOCAL_HOST "127.0.0.1"
@@ -66,7 +67,7 @@ int run_server() {
 
         // recieveing requests from accepted socket
         char request_buff[1024]; // keep it in a big buffer for now
-        int request_buff_size = recv(accepted_skt, request_buff, sizeof(request_buff), 0);
+        recv(accepted_skt, request_buff, sizeof(request_buff), 0);
         // convert request_buff into usable data
         HTTP_Response request = get_response_data(request_buff, sizeof(request_buff));
         
