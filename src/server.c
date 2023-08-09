@@ -3,6 +3,7 @@
 #include <string.h>
 #include <winsock2.h>
 
+#include "server.h"
 #include "http_response.h"
 #include "file.h"
 
@@ -12,12 +13,8 @@
 #define LOCAL_HOST "127.0.0.1"
 #define RESOURCES_DIR "resources/"
 
-/*
- * NOTE:
- *  For now server.c is the main file as I work out running the server
- *  This will change in future as development shifts to focus on the file explorer aspects
- */
-int main(void) {
+// return of 0 is successful, else failed to run
+int run_server() {
     // initialising 
     WSADATA wsa_data;
     WSAStartup(MAKEWORD(2,2), &wsa_data); // MAKEWORD(2,2) calls for v2.2 of winsock
