@@ -65,40 +65,9 @@ int get_paths_in_dir(char ***path_arr, const char *curr_dir)
 {
     size_t num_paths = 0; // logical length of path_arr
 
-    // create buffer
-    // TEMP: starting at 1 to test resizing
-    int max_path_arr_buff_size = 1; // starting with size of 64 hoping to not need to resize ever
-    char **path_arr_buff = (char **)malloc(max_path_arr_buff_size * sizeof(char *));
-
-    // populate buffer
-    // TEMP: adding random data into array to test resizing
-    for (int i = 0; i < 10; i++)
-    {
-        // increase buffer size when needed
-        if (num_paths + 1 >= max_path_arr_buff_size)
-        {
-            max_path_arr_buff_size += 2;              // TEMP: only adding space for 2 more for testing
-            char **tmp_path_arr_buff = path_arr_buff; // creating 2nd pointer to values
-            path_arr_buff = (char **)malloc(max_path_arr_buff_size * sizeof(char *));
-            // repopulating old buffer
-            for (int j = 0; j < num_paths; j++)
-            {
-                path_arr_buff[j] = tmp_path_arr_buff[j];
-            }
-            free(tmp_path_arr_buff);
-        }
-
-        // appending data to path_arr_buff
-        path_arr_buff[0] = (char *)malloc(64 * sizeof(char)); // TODO: standardise path string lengths in program
-        strcpy(path_arr_buff[0], "test");
-
-        // keep track of logical length of buffer
-        num_paths++;
-    }
-
-    // assign enough memory to path_arr to perfectly fit buffer
-
-    // populate path_arr
+    // iterate over curr_dir and count exactly how many elements there are
+    // resize path_arr to fit number of found elements (minus unwanted elements - ".." and ".")
+    // iterate over curr_dir again and populae path_arr
 
     // populate path_arr with paths excluding "./" and "../"
     strcpy((*path_arr)[0], "0");
