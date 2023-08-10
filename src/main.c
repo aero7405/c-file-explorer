@@ -33,6 +33,8 @@ bool is_dot_path(const char *path)
 
 int main(void)
 {
+    run_server();
+    return 0;
     // short program to print every file and folder name within dir
     DIR *user_dir = opendir(".");          // scanner for dirs
     char dir_arr[1024][256];               // max queue of 1024 directories to search and max path length of 256

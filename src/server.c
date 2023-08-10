@@ -12,7 +12,7 @@
 
 #define PORT 80
 #define LOCAL_HOST "127.0.0.1"
-#define RESOURCES_DIR "resources/"
+#define RESOURCES_DIR "resources/test_page/"
 
 // return of 0 is successful, else failed to run
 int run_server()
