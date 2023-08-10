@@ -1,51 +1,36 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <stdbool.h>
+#include <stdlib.h>
 
 #include "server.h"
-
-// I will return to this eventually and try to understand it
-// https://stackoverflow.com/questions/4553012/checking-if-a-file-is-a-directory-or-just-a-file
-bool is_directory(const char *path)
-{
-    struct stat stat_buff;
-    if (stat(path, &stat_buff) != 0)
-        return 0;
-    return S_ISDIR(stat_buff.st_mode);
-}
-
-// checks if path is just dots
-bool is_dot_path(const char *path)
-{
-    char c = path[0];
-    // iterating over array
-    int i = 0;
-    while (c != '\0')
-    {
-        if (c != '.')
-            return false;
-        c = path[++i];
-    }
-    return true;
-}
+#include "file.h"
 
 int main(void)
 {
-    // run_server();
-    // return 0;
-    
+    char *paths[10];
+
+    paths[0] = (char *)malloc(16);
+    strcpy(paths[0], "test");
+    printf("%s\n", paths[0]);
+
+    char ***paths_ptr = &paths; // I have no idea why this works to make sure to draw it out on paper!!!
+    int len = get_paths_in_dir(&paths_ptr, ".");
+
+    printf("%s\n", paths[0]);
+
+    return 0;
+
     // short program to print every file and folder name within dir
-    DIR *user_dir = opendir(".");          // scanner for dirs
-    char dir_arr[1024][256];               // max queue of 1024 directories to search and max path length of 256
-    int dir_arr_length = 0;                // logical length for dir_arr
-    const int DIR_ARRAY_MAX_LENGTH = 1023; // last valid index in dir_array
-    char curr_dir_path[256] = ".";         // path of directory currently scanning
-    char path[256] = "";                   // path to currently found file/folder
-    char path_buff[256] = "";              // buffer for concatinating strings
-    struct dirent *found_dir;              // data regarding found file/folder
-    int max_iterations = 1024;             // big number to avoid infinite loops or running too long while testing
+    DIR *user_dir = opendir(".");                  // scanner for dirs
+    char dir_arr[1024][256];                       // max queue of 1024 directories to search and max path length of 256
+    int dir_arr_length = 0;                        // logical length for dir_arr
+    const int DIR_ARRAY_MAX_LENGTH = 1023;         // last valid index in dir_array
+    char curr_dir_path[256] = ".";                 // path of directory currently scanning
+    char path[256] = "";                           // path to currently found file/folder
+    char path_buff[256] = "";                      // buffer for concatinating strings
+    struct dirent *found_dir;                      // data regarding found file/folder
+    int max_iterations = DIR_ARRAY_MAX_LENGTH + 1; // big number to avoid infinite loops or running too long while testing
 
     while (user_dir && (max_iterations-- > 0))
     { // while user_dir is open
@@ -55,7 +40,7 @@ int main(void)
         if (found_dir != NULL)
         {
             // skipping path to go back
-            if (is_dot_path(found_dir->d_name))
+            if (is_only_periods(found_dir->d_name))
                 continue;
             // getting full relative path to folder or file not just its name
             strcpy(path_buff, curr_dir_path);

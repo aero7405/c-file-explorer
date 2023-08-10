@@ -15,7 +15,7 @@
 #define RESOURCES_DIR "resources/test_page/"
 
 // return of 0 is successful, else failed to run
-int run_server()
+int run_test_server()
 {
     // initialising
     WSADATA wsa_data;
