@@ -9,6 +9,6 @@ bool is_directory(const char *);
 
 bool is_only_periods(const char *);
 
-int get_paths_in_dir(char ***, const char *);
+int get_paths_in_dir(char ***, size_t, const char *);
 
 #endif

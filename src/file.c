@@ -8,7 +8,9 @@
 
 #include "file.h"
 
-// returns size of buffer assigned to byte_buff
+#define PATH_STRING_LENGTH 256 // 256 should be enough to contain any reasonable file path
+
+// returns size of buffer assigned to byte_buff (-1 if file failed to open)
 int get_from_file(char **byte_buff, const char *filename)
 {
     FILE *file_ptr;
@@ -60,18 +62,80 @@ bool is_only_periods(const char *path)
     return true;
 }
 
-// populates path_arr with paths in curr_dir, resizes path_arr to perfectly fit all paths, returns length of path_arr
-int get_paths_in_dir(char ***path_arr, const char *curr_dir)
+// populates path_arr with paths in curr_dir,
+// resizes path_arr to perfectly fit all paths,
+// returns length of path_arr
+int get_paths_in_dir(char ***path_arr, size_t path_arr_size, const char *curr_dir_path)
 {
     size_t num_paths = 0; // logical length of path_arr
 
     // iterate over curr_dir and count exactly how many elements there are
-    // resize path_arr to fit number of found elements (minus unwanted elements - ".." and ".")
-    // iterate over curr_dir again and populae path_arr
+    DIR *curr_dir = opendir(curr_dir_path);
+    char curr_path[PATH_STRING_LENGTH]; // path to directory found in each iteration
+    struct dirent *found_dir;           // data found about directory
+    while (curr_dir)
+    { // while curr_dir is open
+        // getting next dir struct in stream
+        found_dir = readdir(curr_dir);
+        // ending search if end of stream reached
+        if (found_dir == NULL)
+            break;
+        // skipping path to go back
+        if (is_only_periods(found_dir->d_name))
+            continue;
+        // increase count of paths to allocate space for
+        num_paths++;
+    }
+
+    // case where no directories are found to avoid malloc(0)
+    if (num_paths < 1)
+    {
+        return 0;
+    }
+
+    // resize path_arr to fit number of found elements (minus unwanted elements - "../" and "./")
+    // free all the memory in path array
+    for (size_t i; i < path_arr_size; i++)
+        free(*path_arr[i]);
+    free(*path_arr);
+    // reallocate memory
+    *path_arr = (char **)malloc(num_paths * sizeof(char *));
+    for (size_t i; i < num_paths; i++)
+        (*path_arr)[i] = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
+
+    printf("Memory reallocated!\n"); // TEMP:
 
     // populate path_arr with paths excluding "./" and "../"
-    strcpy((*path_arr)[0], "0");
-    num_paths = 1;
+    rewinddir(curr_dir_path); // resetting curr_dir
+    int i = 0;                // iterator for path_arr
+    while (curr_dir)
+    { // while curr_dir is open
+        // getting next dir struct in stream
+        found_dir = readdir(curr_dir);
+        // ending search if end of stream reached
+        if (found_dir == NULL)
+        {
+            // cleaning up :P
+            closedir(curr_dir);
+            break;
+        }
+        // skipping path to go back
+        if (is_only_periods(found_dir->d_name))
+            continue;
+        // getting full relative path to folder or file not just its name
+        strcpy(curr_path, curr_dir_path);
+        strcat(curr_path, "/");
+        strcat(curr_path, found_dir->d_name);
+        // concatinating '/' to end if element if a directory
+        if (is_directory(curr_path))
+        {
+            strcat(curr_path, "/");
+        }
+        // append path to path_arr
+        printf("%s\n", curr_path);
+        strcpy((*path_arr)[i++], curr_path);
+        // not incrementing num_paths because that was already done previously
+    }
 
     return num_paths;
 }

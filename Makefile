@@ -2,6 +2,7 @@ CC			:= gcc
 
 LIBS		:= -lws2_32
 INCLUDES 	:= -Iinclude
+# optional flags for the mentally insane "-ansi -pedantic"
 CFLAGS 		:= -Wall -g # [warnings] [debug]
 
 SRC_DIR 	:= src

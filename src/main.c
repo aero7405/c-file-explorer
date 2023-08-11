@@ -8,18 +8,18 @@
 
 int main(void)
 {
-    char *paths[10];
+    char **paths = NULL;
+    paths = (char **)malloc(10 * sizeof(char *));
+    paths[0] = (char *)malloc(16 * sizeof(char));
 
-    paths[0] = (char *)malloc(16);
     strcpy(paths[0], "test");
-    printf("%s\n", paths[0]);
+    printf("10->%s\n", paths[0]);
 
-    char ***paths_ptr = &paths; // I have no idea why this works to make sure to draw it out on paper!!!
-    int len = get_paths_in_dir(&paths_ptr, ".");
+    int len = get_paths_in_dir(&paths, 10, ".");
 
-    printf("%s\n", paths[0]);
+    printf("%d->%s\n", len, paths[0]);
 
-    return 0;
+    return 0; // intetionally making everything below this dead code
 
     // short program to print every file and folder name within dir
     DIR *user_dir = opendir(".");                  // scanner for dirs
