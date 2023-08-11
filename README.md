@@ -1,10 +1,11 @@
 # c-file-explorer
 A basic file-explorer that uses HTML hosted on a local server as its GUI.
-**Project status:** *Initial development* 
+
+**Project status:** Initial development
 
 ### Features
  - Reading C drive
- - Browsing disc (unimplemented!)
+ - Browsing disc *(unimplemented!)*
  - Hosting its own local server for GUI
 
 ### Building
