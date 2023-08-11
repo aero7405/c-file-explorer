@@ -18,9 +18,8 @@ int main(void)
 
     // TEMP: limiting iterations so testing doesn't take *forever*
     int max_iterations = 200;
-    while (max_iterations-- > 0)
-    {                 // repeats until break
-                      // assigning paths
+    while (max_iterations-- > 0) // repeats until break
+    {
         paths = NULL; // proper cleanup is at bottom
         // getting all dirs in current dir
         paths_len = get_paths_in_dir(&paths, curr_dir);
@@ -41,15 +40,12 @@ int main(void)
                 strcpy(folder_path_queue[queue_len], paths[i]);
                 queue_len++;
             }
-
-            // printing found dir
             printf("%s\n", paths[i]);
         }
 
         // breaking if no elements in queue
         if (queue_len < 1)
             break;
-
         // getting next path in queue to search
         strcpy(curr_dir, folder_path_queue[0]);
         // shift all elements in queue left 1
