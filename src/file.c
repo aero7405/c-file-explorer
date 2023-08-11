@@ -8,8 +8,6 @@
 
 #include "file.h"
 
-#define PATH_STRING_LENGTH 256 // 256 should be enough to contain any reasonable file path
-
 // returns size of buffer assigned to byte_buff (-1 if file failed to open)
 int get_from_file(char **byte_buff, const char *filename)
 {
@@ -65,11 +63,14 @@ bool is_only_periods(const char *path)
 // populates path_arr with paths in curr_dir,
 // resizes path_arr to perfectly fit all paths,
 // returns length of path_arr
-int get_paths_in_dir(char ***path_arr, size_t path_arr_size, const char *curr_dir_path)
+int get_paths_in_dir(char ***path_arr, const char *curr_dir_path)
 {
-    size_t num_paths = 0; // logical length of path_arr
+    // expects **path_arr == NULL
+    if (path_arr == NULL || *path_arr != NULL)
+        return -1;
 
     // iterate over curr_dir and count exactly how many elements there are
+    size_t num_paths = 0; // logical length of path_arr
     DIR *curr_dir = opendir(curr_dir_path);
     char curr_path[PATH_STRING_LENGTH]; // path to directory found in each iteration
     struct dirent *found_dir;           // data found about directory
@@ -89,25 +90,27 @@ int get_paths_in_dir(char ***path_arr, size_t path_arr_size, const char *curr_di
 
     // case where no directories are found to avoid malloc(0)
     if (num_paths < 1)
-    {
         return 0;
+
+    // allocating required memory for array
+    // no need to free memory because we have already checked that there was none allocated
+    *path_arr = (char **)malloc(num_paths * sizeof(char *));
+    // checking for failed allocation
+    if (*path_arr == NULL)
+        return -1;
+    // allocating required memory for strings
+    for (size_t i = 0; i < num_paths; i++)
+    {
+        // Lost many MANY hours of my life because I forgot to assign a starting value of i
+        (*path_arr)[i] = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
+        // checking for failed allocation
+        if ((*path_arr)[i] == NULL)
+            return -1;
     }
 
-    // resize path_arr to fit number of found elements (minus unwanted elements - "../" and "./")
-    // free all the memory in path array
-    for (size_t i; i < path_arr_size; i++)
-        free(*path_arr[i]);
-    free(*path_arr);
-    // reallocate memory
-    *path_arr = (char **)malloc(num_paths * sizeof(char *));
-    for (size_t i; i < num_paths; i++)
-        (*path_arr)[i] = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
-
-    printf("Memory reallocated!\n"); // TEMP:
-
     // populate path_arr with paths excluding "./" and "../"
-    rewinddir(curr_dir_path); // resetting curr_dir
-    int i = 0;                // iterator for path_arr
+    rewinddir(curr_dir); // resetting curr_dir
+    int i = 0;           // iterator for path_arr
     while (curr_dir)
     { // while curr_dir is open
         // getting next dir struct in stream
@@ -124,17 +127,14 @@ int get_paths_in_dir(char ***path_arr, size_t path_arr_size, const char *curr_di
             continue;
         // getting full relative path to folder or file not just its name
         strcpy(curr_path, curr_dir_path);
-        strcat(curr_path, "/");
+        if (curr_dir_path[strlen(curr_dir_path) - 1] != '/') // adding slash if not present
+            strcat(curr_path, "/");
         strcat(curr_path, found_dir->d_name);
         // concatinating '/' to end if element if a directory
         if (is_directory(curr_path))
-        {
             strcat(curr_path, "/");
-        }
         // append path to path_arr
-        printf("%s\n", curr_path);
         strcpy((*path_arr)[i++], curr_path);
-        // not incrementing num_paths because that was already done previously
     }
 
     return num_paths;

@@ -8,94 +8,63 @@
 
 int main(void)
 {
+    // initialising to take minimum amount of memory until needed because it is dynamically reallocated anyway
     char **paths = NULL;
-    paths = (char **)malloc(10 * sizeof(char *));
-    paths[0] = (char *)malloc(16 * sizeof(char));
+    int paths_len = 0;
 
-    strcpy(paths[0], "test");
-    printf("10->%s\n", paths[0]);
+    char curr_dir[PATH_STRING_LENGTH] = "C:/";
+    char folder_path_queue[1024][PATH_STRING_LENGTH];
+    int queue_len = 1;
 
-    int len = get_paths_in_dir(&paths, 10, ".");
+    // TEMP: limiting iterations so testing doesn't take *forever*
+    int max_iterations = 200;
+    while (max_iterations-- > 0)
+    {                 // repeats until break
+                      // assigning paths
+        paths = NULL; // proper cleanup is at bottom
+        // getting all dirs in current dir
+        paths_len = get_paths_in_dir(&paths, curr_dir);
 
-    printf("%d->%s\n", len, paths[0]);
-
-    return 0; // intetionally making everything below this dead code
-
-    // short program to print every file and folder name within dir
-    DIR *user_dir = opendir(".");                  // scanner for dirs
-    char dir_arr[1024][256];                       // max queue of 1024 directories to search and max path length of 256
-    int dir_arr_length = 0;                        // logical length for dir_arr
-    const int DIR_ARRAY_MAX_LENGTH = 1023;         // last valid index in dir_array
-    char curr_dir_path[256] = ".";                 // path of directory currently scanning
-    char path[256] = "";                           // path to currently found file/folder
-    char path_buff[256] = "";                      // buffer for concatinating strings
-    struct dirent *found_dir;                      // data regarding found file/folder
-    int max_iterations = DIR_ARRAY_MAX_LENGTH + 1; // big number to avoid infinite loops or running too long while testing
-
-    while (user_dir && (max_iterations-- > 0))
-    { // while user_dir is open
-        // getting next dir struct
-        found_dir = readdir(user_dir);
-        // checking if there was a dir remaining in the stream
-        if (found_dir != NULL)
+        // raising error if paths hasn't been initialised correctly
+        if (paths_len == -1)
         {
-            // skipping path to go back
-            if (is_only_periods(found_dir->d_name))
-                continue;
-            // getting full relative path to folder or file not just its name
-            strcpy(path_buff, curr_dir_path);
-            strcat(path_buff, "/");
-            strcat(path_buff, found_dir->d_name);
-            strcpy(path, path_buff);
-            printf("%s", path);
-            // checking if found_dir is a folder or file
-            if (is_directory(path))
-            {
-                // checking there is space in array
-                if (dir_arr_length < DIR_ARRAY_MAX_LENGTH)
-                {
-                    // adding to dir_path
-                    strcpy(dir_arr[dir_arr_length], path);
-                    dir_arr_length++;
-                    printf("/");
-                }
-            }
-            printf("\n");
+            printf("WARNING: UNABLE TO GET DIRECTORIES AT REQUESTED PATH!\n");
+            return 1;
         }
-        else
+
+        // adding any folder dirs to path
+        for (int i = 0; i < paths_len; i++)
         {
-            // printf("End of stream reached for:\n\t%s\n", curr_dir_path);
-            // ensuring that the dir is always closed
-            closedir(user_dir);
-
-            if (dir_arr_length > 0)
+            // adding dir to queue if found to be a folder and space in queue
+            if (queue_len + 1 < 1024 && IS_FOLDER(paths[i]))
             {
-                user_dir = opendir(dir_arr[0]); // get the first element of queue and start search again from there
-
-                // updating curr_dir_path
-                strcpy(curr_dir_path, dir_arr[0]);
-                // printf("Now searching: %s\n", curr_dir_path);
-
-                // printing dir_arr
-                // printf("~search queue~\n");
-                // for (int i = 0; i < dir_arr_length; i++)
-                //     printf("\t%s\n", dir_arr[i]);
-
-                // removing first element from dir_arr
-                char dir_arr_buff[1024][256];
-                for (int i = 1; i < dir_arr_length; i++)
-                    strcpy(dir_arr_buff[i - 1], dir_arr[i]);
-                dir_arr_length--;
-                for (int i = 0; i < dir_arr_length; i++)
-                    strcpy(dir_arr[i], dir_arr_buff[i]);
+                strcpy(folder_path_queue[queue_len], paths[i]);
+                queue_len++;
             }
-            else
-            {
-                // finished search
-                break;
-            }
+
+            // printing found dir
+            printf("%s\n", paths[i]);
         }
+
+        // breaking if no elements in queue
+        if (queue_len < 1)
+            break;
+
+        // getting next path in queue to search
+        strcpy(curr_dir, folder_path_queue[0]);
+        // shift all elements in queue left 1
+        for (int i = 0; i < queue_len - 1; i++) // -1 so that we don't try to access out of bounds when we [i + 1]
+            strcpy(folder_path_queue[i], folder_path_queue[i + 1]);
+        // 1st element is removed from queue so deincrement queue_len
+        queue_len--;
+
+        // cleaning up paths
+        for (int i = 0; i < paths_len; i++)
+            free(paths[i]);
+        free(paths);
     }
+
+    getchar(); // pausing :)
 
     return 0;
 }

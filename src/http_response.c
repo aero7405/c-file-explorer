@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "http_response.h"
+#include "file.h"
 
 HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
 {
@@ -49,12 +50,16 @@ HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
                 // printf("->GET\n");
                 // getting the path of the resource to get
                 // need to malloc otherwise the string itself will go out of scope
-                char *resource_path = (char *)malloc(64);      // 64 is probably enough for file paths
-                strcpy(resource_path, curr_line_buff + 4 + 1); // + 1 to not include a /
-                // adding termination character at first space
-                *strchr(resource_path, ' ') = '\0';
-                // updating struct to the resource path
-                response.resource_path = resource_path;
+                char *resource_path = (char *)malloc(PATH_STRING_LENGTH);
+                // catching failed memory allocation
+                if (resource_path != NULL)
+                {
+                    strcpy(resource_path, curr_line_buff + 4 + 1); // + 1 to not include a /
+                    // adding termination character at first space
+                    *strchr(resource_path, ' ') = '\0';
+                    // updating struct to the resource path
+                    response.resource_path = resource_path;
+                } // else response.resource_path should still be NULL
             }
             else if (strcmp(buff, "POST") == 0)
             {
