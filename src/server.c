@@ -76,6 +76,9 @@ int run_test_server()
         // convert request_buff into usable data
         HTTP_Response request = get_response_data(request_buff, sizeof(request_buff));
 
+        // printf("\n");
+        // printf(request_buff);
+        // printf("\n");
         // printf("\nHTTP Method: %d\n", request.method);
         // printf("Accept: %d\n", request.accept);
         // printf("Resource Path: %s\n", request.resource_path);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "http_response.h"
 #include "file.h"
@@ -48,24 +49,32 @@ HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
             {
                 response.method = HTTP_GET;
                 // printf("->GET\n");
-                // getting the path of the resource to get
-                // need to malloc otherwise the string itself will go out of scope
-                char *resource_path = (char *)malloc(PATH_STRING_LENGTH);
-                // catching failed memory allocation
-                if (resource_path != NULL)
+                // allocating memory for paths
+                // TODO: add query string to struct and then do something with it
+                char *resource_path = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
+                strcpy(resource_path, "");
+                char *query_string = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
+                strcpy(query_string, "");
+                // splits path at ' '
+                char *token = strtok(curr_line_buff, " ");
+                token = strtok(NULL, " "); // getting 2nd term
+                if (token != NULL)
                 {
-                    strcpy(resource_path, curr_line_buff + 4 + 1); // + 1 to not include a /
-                    // adding termination character at first space
-                    *strchr(resource_path, ' ') = '\0';
-                    // updating struct to the resource path
-                    response.resource_path = resource_path;
-                } // else response.resource_path should still be NULL
+                    strcpy(resource_path, token + 1);
+                    // checking if resource path can be split at '?'
+                    token = strtok(resource_path, "?");
+                    token = strtok(NULL, "?"); // getting 2nd term
+                    if (token != NULL)
+                        strcpy(query_string, token);
+                }
+                // updating struct to the resource path
+                response.resource_path = resource_path;
             }
             else if (strcmp(buff, "POST") == 0)
             {
                 // Do nothing here for now as we don't really need to post yet
                 response.method = HTTP_POST;
-                printf("WARNING: POST branch in get_response_data is unimplemented!\n");
+                printf("WARNING: POST branch in function get_response_data is unimplemented!\n");
             }
             else if (strcmp(buff, "Accept:") == 0)
             {

@@ -8,6 +8,9 @@
 
 int main(void)
 {
+    run_test_server();
+    return 0;
+
     // initialising to take minimum amount of memory until needed because it is dynamically reallocated anyway
     char **paths = NULL;
     int paths_len = 0;
@@ -16,9 +19,9 @@ int main(void)
     char folder_path_queue[1024][PATH_STRING_LENGTH];
     int queue_len = 1;
 
-    // TEMP: limiting iterations so testing doesn't take *forever*
+    // limiting iterations so testing doesn't take *forever*
     int max_iterations = 200;
-    while (max_iterations-- > 0) // repeats until break
+    while (max_iterations-- > 0) // repeats until break or max iterations reaches 0
     {
         paths = NULL; // proper cleanup is at bottom
         // getting all dirs in current dir
