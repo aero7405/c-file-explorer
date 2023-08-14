@@ -17,6 +17,14 @@
 // return of 0 is successful, else failed to run
 int run_test_server()
 {
+    // TEMP: testing get_query_string_parameters
+    Query_String_Parameter *params;
+    int i = get_query_string_parameters(&params, "what?this");
+    for (int j = 0; j < i; j++)
+        printf("%d, ", params[j].test);
+    printf("\n");
+    return 0;
+
     // initialising
     WSADATA wsa_data;
     WSAStartup(MAKEWORD(2, 2), &wsa_data); // MAKEWORD(2,2) calls for v2.2 of winsock

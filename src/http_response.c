@@ -6,6 +6,39 @@
 #include "http_response.h"
 #include "file.h"
 
+// returns the number of parameters put into the array parameter_arr
+int get_query_string_parameters(Query_String_Parameter **parameter_arr, const char *query_string)
+{
+    // counting number of tokens
+    int parameter_cnt = 0;
+    char *parameter_string = strtok(query_string, "&");
+    while (parameter_string != NULL)
+    {
+        parameter_cnt++;
+        parameter_string = strtok(NULL, "&"); // getting next token
+    }
+
+    // allocating memory for parameter_arr
+    *parameter_arr = (Query_String_Parameter *)malloc(parameter_cnt * sizeof(Query_String_Parameter));
+    // catching failed memory allocation
+    if (*parameter_arr == NULL)
+    {
+        return -1;
+    }
+
+    // populating parameter_arr
+    parameter_string = strtok(parameter_arr, "&");
+    for (int i = 0; i < parameter_cnt; i++)
+    {
+        // creating parameter
+        (*parameter_arr)[i].test = 0;
+
+        parameter_string = strtok(NULL, "&"); // getting next token
+    }
+
+    return parameter_cnt;
+}
+
 HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
 {
     HTTP_Response response;
@@ -50,7 +83,6 @@ HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
                 response.method = HTTP_GET;
                 // printf("->GET\n");
                 // allocating memory for paths
-                // TODO: add query string to struct and then do something with it
                 char *resource_path = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
                 strcpy(resource_path, "");
                 char *query_string = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
@@ -69,6 +101,7 @@ HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
                 }
                 // updating struct to the resource path
                 response.resource_path = resource_path;
+                response.query_string = query_string;
             }
             else if (strcmp(buff, "POST") == 0)
             {

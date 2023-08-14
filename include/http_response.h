@@ -24,9 +24,18 @@ typedef struct HTTP_Response
     HTTP_Method method;
     HTTP_Accept_Types accept;
     char *resource_path;
-    char *query_strings;
+    char *query_string;
 } HTTP_Response;
 
+typedef struct Query_String_Parameter
+{
+    char *key;
+    char *value;
+    int test; // TEMP: having an int for testing so I don't have to think about strings yet
+} Query_String_Parameter;
+
 HTTP_Response get_response_data(char *, size_t);
+
+int get_query_string_parameters(Query_String_Parameter **, const char *);
 
 #endif
