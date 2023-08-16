@@ -35,6 +35,6 @@ typedef struct Query_String_Parameter
 
 HTTP_Response get_response_data(char *, size_t);
 
-int get_query_string_parameters(Query_String_Parameter **, char *);
+int get_query_string_parameters(Query_String_Parameter **, const char *);
 
 #endif
