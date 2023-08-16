@@ -7,8 +7,12 @@
 #include "file.h"
 
 // returns the number of parameters put into the array parameter_arr
-int get_query_string_parameters(Query_String_Parameter **parameter_arr, const char *query_string)
+int get_query_string_parameters(Query_String_Parameter **parameter_arr, char *query_string)
 {
+    // if query string is empty just return 0 and do nothing
+    if (strcmp(query_string, "") == 0)
+        return 0;
+
     // counting number of tokens
     int parameter_cnt = 0;
     char *parameter_string = strtok(query_string, "&");
@@ -22,18 +26,22 @@ int get_query_string_parameters(Query_String_Parameter **parameter_arr, const ch
     *parameter_arr = (Query_String_Parameter *)malloc(parameter_cnt * sizeof(Query_String_Parameter));
     // catching failed memory allocation
     if (*parameter_arr == NULL)
-    {
         return -1;
-    }
 
     // populating parameter_arr
-    parameter_string = strtok(parameter_arr, "&");
-    for (int i = 0; i < parameter_cnt; i++)
+    parameter_string = strtok(query_string, "&");
+    int i = 0;
+    char *parameter_buff;
+    for (; i < 2; i++)
     {
-        // creating parameter
-        (*parameter_arr)[i].test = 0;
-
-        parameter_string = strtok(NULL, "&"); // getting next token
+        // creating string for key
+        parameter_buff = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
+        strcpy(parameter_buff, "test");
+        (*parameter_arr)[i].key = parameter_buff;
+        // TODO: split parameter_string into key and value componenets
+        // getting next token
+        parameter_string = strtok(NULL, "&");
+        i++;
     }
 
     return parameter_cnt;
