@@ -17,15 +17,6 @@
 // return of 0 is successful, else failed to run
 int run_test_server()
 {
-    // TEMP: testing get_query_string_parameters
-    Query_String_Parameter *params;
-    char query_string[] = "what=a&this=b&working=c";
-    int len = get_query_string_parameters(&params, query_string);
-    printf("%d params found\n", len);
-    for (int i = 0; i < len; i++)
-        printf("%d->%s, %s\n", i, params[i].key, params[i].value);
-    return 0;
-
     // initialising
     WSADATA wsa_data;
     WSAStartup(MAKEWORD(2, 2), &wsa_data); // MAKEWORD(2,2) calls for v2.2 of winsock
@@ -91,6 +82,16 @@ int run_test_server()
         // printf("\nHTTP Method: %d\n", request.method);
         // printf("Accept: %d\n", request.accept);
         // printf("Resource Path: %s\n", request.resource_path);
+
+        // printing query string
+        Query_String_Parameter *params;
+        int len = get_query_string_parameters(&params, request.query_string);
+        if (len > 0)
+        {
+            printf("%d params found for query string \"%s\"\n", len, request.query_string);
+            for (int i = 0; i < len; i++)
+                printf("\t%d->%s, %s\n", i, params[i].key, params[i].value);
+        }
 
         // special case as "" is actually "index.html"
         if (strcmp(request.resource_path, "") == 0)

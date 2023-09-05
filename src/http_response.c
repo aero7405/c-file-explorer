@@ -34,15 +34,19 @@ int get_query_string_parameters(Query_String_Parameter **parameter_arr, const ch
 
     // repairing copy of string
     strcpy(query_string_cpy, query_string);
+
     // populating parameter_arr
     parameter_string = strtok(query_string_cpy, "&");
-    char parameter_string_cpy[PATH_STRING_LENGTH]; // strtok modifies the string so we must copy it
+    char parameter_string_cpy[PATH_STRING_LENGTH];
     char *parameter_buff = NULL;
     for (int i = 0; i < parameter_cnt; i++)
     {
-        // FIXME: crashes on 2nd iteration with segment fault for some reason
-        // copying string
+        // strtok modifies the string so we must copy it
         strcpy(parameter_string_cpy, parameter_string);
+
+        // getting index of first occurance of '='
+        char *c_ptr = strchr(parameter_string_cpy, '=');
+        int split_idx = (int)(c_ptr - parameter_string_cpy);
 
         // creating string for key
         parameter_buff = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
@@ -50,7 +54,8 @@ int get_query_string_parameters(Query_String_Parameter **parameter_arr, const ch
         if (parameter_buff == NULL)
             return -1;
         // getting key
-        strcpy(parameter_buff, strtok(parameter_string_cpy, "="));
+        strncpy(parameter_buff, parameter_string_cpy, split_idx);
+        parameter_buff[split_idx] = '\0'; // adding termination character because strncpy won't (lazy prick)
         // catching invalid query parameter format
         if (parameter_buff == NULL)
             return i; // returning number of parameters that were successfully populated
@@ -62,7 +67,7 @@ int get_query_string_parameters(Query_String_Parameter **parameter_arr, const ch
         if (parameter_buff == NULL)
             return -1;
         // getting key
-        strcpy(parameter_buff, strtok(NULL, "="));
+        strcpy(parameter_buff, parameter_string_cpy + split_idx + 1); // + 1 to more the pointer past the =
         // catching invalid query parameter format
         if (parameter_buff == NULL)
             return i; // returning number of parameters that were successfully populated
@@ -75,6 +80,7 @@ int get_query_string_parameters(Query_String_Parameter **parameter_arr, const ch
     return parameter_cnt;
 }
 
+// WARNING: there are no catches for failed memory allocation written in this function
 HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
 {
     HTTP_Response response;
