@@ -19,11 +19,11 @@ int run_test_server()
 {
     // TEMP: testing get_query_string_parameters
     Query_String_Parameter *params;
-    char query_string[] = "what&this&working?";
+    char query_string[] = "what=a&this=b&working=c";
     int len = get_query_string_parameters(&params, query_string);
     printf("%d params found\n", len);
     for (int i = 0; i < len; i++)
-        printf("%d->%s\n", i, params[i].key);
+        printf("%d->%s, %s\n", i, params[i].key, params[i].value);
     return 0;
 
     // initialising

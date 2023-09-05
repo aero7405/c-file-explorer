@@ -36,18 +36,39 @@ int get_query_string_parameters(Query_String_Parameter **parameter_arr, const ch
     strcpy(query_string_cpy, query_string);
     // populating parameter_arr
     parameter_string = strtok(query_string_cpy, "&");
-    char *parameter_buff;
+    char parameter_string_cpy[PATH_STRING_LENGTH]; // strtok modifies the string so we must copy it
+    char *parameter_buff = NULL;
     for (int i = 0; i < parameter_cnt; i++)
     {
+        // FIXME: crashes on 2nd iteration with segment fault for some reason
+        // copying string
+        strcpy(parameter_string_cpy, parameter_string);
+
         // creating string for key
-        // TODO: split parameter_string into key and value components
         parameter_buff = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
         // catching failed memory allocation
         if (parameter_buff == NULL)
             return -1;
-        strcpy(parameter_buff, parameter_string);
+        // getting key
+        strcpy(parameter_buff, strtok(parameter_string_cpy, "="));
+        // catching invalid query parameter format
+        if (parameter_buff == NULL)
+            return i; // returning number of parameters that were successfully populated
         (*parameter_arr)[i].key = parameter_buff;
-        // getting next token
+
+        // creating string for value
+        parameter_buff = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
+        // catching failed memory allocation
+        if (parameter_buff == NULL)
+            return -1;
+        // getting key
+        strcpy(parameter_buff, strtok(NULL, "="));
+        // catching invalid query parameter format
+        if (parameter_buff == NULL)
+            return i; // returning number of parameters that were successfully populated
+        (*parameter_arr)[i].value = parameter_buff;
+
+        // getting next pair
         parameter_string = strtok(NULL, "&");
     }
 
