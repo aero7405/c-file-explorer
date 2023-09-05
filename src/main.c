@@ -8,7 +8,7 @@
 
 int main(void)
 {
-    run_test_server();
+    run_server();
     return 0;
 
     // initialising to take minimum amount of memory until needed because it is dynamically reallocated anyway

@@ -10,8 +10,8 @@ INCLUDE_DIR := include
 OBJ_DIR		:= obj
 
 TARGET 		:= c-file-explorer
-OBJ_FILES 	:= $(OBJ_DIR)/main.o $(OBJ_DIR)/server.o $(OBJ_DIR)/http_response.o $(OBJ_DIR)/file.o
-INCLUDE_FILES := $(INCLUDE_DIR)/server.h $(INCLUDE_DIR)/http_response.h $(INCLUDE_DIR)/file.h
+OBJ_FILES 	:= $(OBJ_DIR)/main.o $(OBJ_DIR)/server.o $(OBJ_DIR)/http_response.o $(OBJ_DIR)/file.o $(OBJ_DIR)/generate_page.o
+INCLUDE_FILES := $(INCLUDE_DIR)/server.h $(INCLUDE_DIR)/http_response.h $(INCLUDE_DIR)/file.h $(INCLUDE_DIR)/generate_page.h
 
 # Running target after compilation
 all: $(TARGET)
@@ -33,4 +33,7 @@ $(OBJ_DIR)/http_response.o: $(SRC_DIR)/http_response.c $(INCLUDE_FILES)
 	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES) $(LIBS)
 
 $(OBJ_DIR)/file.o: $(SRC_DIR)/file.c $(INCLUDE_FILES)
+	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES) $(LIBS)
+
+$(OBJ_DIR)/generate_page.o: $(SRC_DIR)/generate_page.c $(INCLUDE_FILES)
 	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES) $(LIBS)

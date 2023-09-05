@@ -6,16 +6,16 @@
 #include "server.h"
 #include "http_response.h"
 #include "file.h"
+#include "generate_page.h"
 
 // This *was* needed at one point but linking with Make seems to have removed the need for it
 // #pragma comment(lib, "ws2_32.lib")
 
 #define PORT 80
 #define LOCAL_HOST "127.0.0.1"
-#define RESOURCES_DIR "resources/test_page/"
 
 // return of 0 is successful, else failed to run
-int run_test_server()
+int run_server()
 {
     // initialising
     WSADATA wsa_data;
@@ -76,52 +76,20 @@ int run_test_server()
         // convert request_buff into usable data
         HTTP_Response request = get_response_data(request_buff, sizeof(request_buff));
 
-        // printf("\n");
-        // printf(request_buff);
-        // printf("\n");
-        // printf("\nHTTP Method: %d\n", request.method);
-        // printf("Accept: %d\n", request.accept);
-        // printf("Resource Path: %s\n", request.resource_path);
-
-        // printing query string
-        Query_String_Parameter *params;
-        int len = get_query_string_parameters(&params, request.query_string);
-        if (len > 0)
-        {
-            printf("%d params found for query string \"%s\"\n", len, request.query_string);
-            for (int i = 0; i < len; i++)
-                printf("\t%d->%s, %s\n", i, params[i].key, params[i].value);
+        // sending requested files
+        char *buff;
+        int buff_size = get_resource(&buff, &request);
+        // checking valid buffer
+        if (buff_size > 0)
+        { // no errors encountered
+            send(accepted_skt, buff, buff_size, 0);
         }
-
-        // special case as "" is actually "index.html"
-        if (strcmp(request.resource_path, "") == 0)
+        else
         {
-            // resource_path should be 64 bytes so this is safe
-            strcpy(request.resource_path, "index");
+            printf("WARNING: Failed to get \"%s\".\n", request.resource_path);
         }
-        // special case for html files so we don't have to end pages in ".html"
-        if (request.accept == HTTP_HTML)
-        {
-            char html_extension[6] = ".html";
-            strcat(request.resource_path, html_extension);
-        }
-        // checking http method
-        if (request.method == HTTP_GET)
-        {
-            // sending requested files
-            char *buff;
-            char prefix_dir[] = RESOURCES_DIR;
-            int buff_size = get_from_file(&buff, strcat(prefix_dir, request.resource_path));
-            // checking valid buffer
-            if (buff_size > 0)
-            { // no errors encountered
-                send(accepted_skt, buff, buff_size, 0);
-            }
-            else
-            {
-                printf("WARNING: Failed to get \"%s\".\n", request.resource_path);
-            }
-        }
+        // cleaning up
+        free(buff);
 
         // closing socket
         closesocket(accepted_skt);
