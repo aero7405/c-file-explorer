@@ -18,7 +18,16 @@ int generate_page(char **html, HTTP_Response *request)
                         <title>Test Page</title> \
                         <link rel = 'stylesheet' href = 'css/styles.css'> \
                     </head> \
-                    <body>");
+                    <body> \
+                    <form> \
+                        <input type = 'text' id = 'dir' name = 'dir'><br> \
+                        <input type = 'submit' value = 'Submit'> \
+                    </form>");
+
+    char *curr_dir = get_param_from_query_string(request->query_string, "dir");
+    // TODO: make sure to check that curr_dir != NULL
+
+    printf("%s -> %s\n", request->query_string, curr_dir);
 
     // TODO: fill with page contents
     // TODO: add checking to ensure page never exceeds HTML_MAX_SIZE unless you want segfaults
@@ -31,13 +40,13 @@ int generate_page(char **html, HTTP_Response *request)
 int get_resource(char **response_buff, HTTP_Response *request)
 {
     // if nothing is actually requested just return nothing
-    if ((*request).method != HTTP_GET)
+    if (request->method != HTTP_GET)
         return 0;
 
     // if html is requested generate page and return
     char *buff;
     int buff_size;
-    if ((*request).accept == HTTP_HTML)
+    if (request->accept == HTTP_HTML)
     {
         buff_size = generate_page(&buff, request);
     }
@@ -45,7 +54,7 @@ int get_resource(char **response_buff, HTTP_Response *request)
     {
         // getting all non-HTML resources
         char prefix_dir[] = RESOURCES_DIR; // strcat need to concatinate variable not a macro :/
-        buff_size = get_from_file(&buff, strcat(prefix_dir, (*request).resource_path));
+        buff_size = get_from_file(&buff, strcat(prefix_dir, request->resource_path));
     }
     // returning requested data
     *response_buff = buff;
@@ -55,25 +64,25 @@ int get_resource(char **response_buff, HTTP_Response *request)
 int get_test_page_resource(char **response_buff, HTTP_Response *request)
 {
     // if nothing is actually requested just return nothing
-    if ((*request).method != HTTP_GET)
+    if (request->method != HTTP_GET)
         return 0;
 
     // special case as "" is actually "index.html"
-    if (strcmp((*request).resource_path, "") == 0)
+    if (strcmp(request->resource_path, "") == 0)
     {
         // resource_path should be 64 bytes so this is safe
-        strcpy((*request).resource_path, "index");
+        strcpy(request->resource_path, "index");
     }
     // special case for html files so we don't have to end pages in ".html"
-    if ((*request).accept == HTTP_HTML)
+    if (request->accept == HTTP_HTML)
     {
         char html_extension[6] = ".html";
-        strcat((*request).resource_path, html_extension);
+        strcat(request->resource_path, html_extension);
     }
     // sending requested files
     char *buff;
     char prefix_dir[] = RESOURCES_DIR "test_page/";
-    int buff_size = get_from_file(&buff, strcat(prefix_dir, (*request).resource_path));
+    int buff_size = get_from_file(&buff, strcat(prefix_dir, request->resource_path));
 
     *response_buff = buff;
     return buff_size;

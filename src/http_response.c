@@ -6,8 +6,34 @@
 #include "http_response.h"
 #include "file.h"
 
-// returns the number of parameters put into the array parameter_arr
-int get_query_string_parameters(Query_String_Parameter **parameter_arr, const char *query_string)
+char *get_param_from_query_string(const char *query_string, const char *param)
+{
+    // splitting query string into parameter and value pairs
+    Query_String_Parameter *param_arr;
+    int param_cnt = get_query_string_parameters(&param_arr, query_string);
+    // searching param_arr for the desired parameter
+    char *param_val = NULL;
+    for (int i = 0; i < param_cnt; i++)
+    {
+        if (strcmp(param_arr[i].key, param) == 0)
+        {
+            param_val = param_arr[i].value;
+            free(param_arr[i].key);
+            break;
+        }
+        else
+        {
+            // cleanup if data is no longer needed
+            free(param_arr[i].value);
+            free(param_arr[i].key);
+        }
+    }
+    free(param_arr);
+    return param_val;
+}
+
+// returns the number of parameters put into the array param_arr
+int get_query_string_parameters(Query_String_Parameter **param_arr, const char *query_string)
 {
     // creating copy of query_string because strtok may modify strings apparently
     char query_string_cpy[strlen(query_string)];
@@ -18,66 +44,66 @@ int get_query_string_parameters(Query_String_Parameter **parameter_arr, const ch
         return 0;
 
     // counting number of tokens
-    int parameter_cnt = 0;
-    char *parameter_string = strtok(query_string_cpy, "&");
-    while (parameter_string != NULL)
+    int param_cnt = 0;
+    char *param_string = strtok(query_string_cpy, "&");
+    while (param_string != NULL)
     {
-        parameter_cnt++;
-        parameter_string = strtok(NULL, "&"); // getting next token
+        param_cnt++;
+        param_string = strtok(NULL, "&"); // getting next token
     }
 
-    // allocating memory for parameter_arr
-    *parameter_arr = (Query_String_Parameter *)malloc(parameter_cnt * sizeof(Query_String_Parameter));
+    // allocating memory for param_arr
+    *param_arr = (Query_String_Parameter *)malloc(param_cnt * sizeof(Query_String_Parameter));
     // catching failed memory allocation
-    if (*parameter_arr == NULL)
+    if (*param_arr == NULL)
         return -1;
 
     // repairing copy of string
     strcpy(query_string_cpy, query_string);
 
-    // populating parameter_arr
-    parameter_string = strtok(query_string_cpy, "&");
-    char parameter_string_cpy[PATH_STRING_LENGTH];
-    char *parameter_buff = NULL;
-    for (int i = 0; i < parameter_cnt; i++)
+    // populating param_arr
+    param_string = strtok(query_string_cpy, "&");
+    char param_string_cpy[PATH_STRING_LENGTH];
+    char *param_buff = NULL;
+    for (int i = 0; i < param_cnt; i++)
     {
         // strtok modifies the string so we must copy it
-        strcpy(parameter_string_cpy, parameter_string);
+        strcpy(param_string_cpy, param_string);
 
         // getting index of first occurance of '='
-        char *c_ptr = strchr(parameter_string_cpy, '=');
-        int split_idx = (int)(c_ptr - parameter_string_cpy);
+        char *c_ptr = strchr(param_string_cpy, '=');
+        int split_idx = (int)(c_ptr - param_string_cpy);
 
         // creating string for key
-        parameter_buff = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
+        param_buff = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
         // catching failed memory allocation
-        if (parameter_buff == NULL)
+        if (param_buff == NULL)
             return -1;
         // getting key
-        strncpy(parameter_buff, parameter_string_cpy, split_idx);
-        parameter_buff[split_idx] = '\0'; // adding termination character because strncpy won't (lazy prick)
+        strncpy(param_buff, param_string_cpy, split_idx);
+        param_buff[split_idx] = '\0'; // adding termination character because strncpy won't (lazy prick)
         // catching invalid query parameter format
-        if (parameter_buff == NULL)
+        if (param_buff == NULL)
             return i; // returning number of parameters that were successfully populated
-        (*parameter_arr)[i].key = parameter_buff;
+        (*param_arr)[i].key = param_buff;
 
         // creating string for value
-        parameter_buff = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
+        param_buff = (char *)malloc(PATH_STRING_LENGTH * sizeof(char));
         // catching failed memory allocation
-        if (parameter_buff == NULL)
+        if (param_buff == NULL)
             return -1;
         // getting key
-        strcpy(parameter_buff, parameter_string_cpy + split_idx + 1); // + 1 to more the pointer past the =
+        strcpy(param_buff, param_string_cpy + split_idx + 1); // + 1 to more the pointer past the =
         // catching invalid query parameter format
-        if (parameter_buff == NULL)
+        if (param_buff == NULL)
             return i; // returning number of parameters that were successfully populated
-        (*parameter_arr)[i].value = parameter_buff;
+        (*param_arr)[i].value = param_buff;
 
         // getting next pair
-        parameter_string = strtok(NULL, "&");
+        param_string = strtok(NULL, "&");
     }
 
-    return parameter_cnt;
+    return param_cnt;
 }
 
 // WARNING: there are no catches for failed memory allocation written in this function
@@ -88,6 +114,7 @@ HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
     response.method = HTTP_NO_METHOD;
     response.accept = HTTP_NO_ACCEPT_TYPE;
     response.resource_path = NULL;
+    response.query_string = NULL;
 
     // iterate over buffer and find relevant data
     int i = 0;
@@ -136,8 +163,10 @@ HTTP_Response get_response_data(char *response_buff, size_t response_buff_size)
                 {
                     strcpy(resource_path, token + 1);
                     // checking if resource path can be split at '?'
+                    char c = resource_path[0];
                     token = strtok(resource_path, "?");
-                    token = strtok(NULL, "?"); // getting 2nd term
+                    if (c != '?')
+                        token = strtok(NULL, "?"); // getting 2nd term if path doesn't start with ?
                     if (token != NULL)
                         strcpy(query_string, token);
                 }

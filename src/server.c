@@ -68,7 +68,6 @@ int run_server()
             closesocket(accepted_skt);
             continue;
         }
-        // printf("Accepted socket.\n");
 
         // recieveing requests from accepted socket
         char request_buff[1024]; // keep it in a big buffer for now
@@ -83,13 +82,13 @@ int run_server()
         if (buff_size > 0)
         { // no errors encountered
             send(accepted_skt, buff, buff_size, 0);
+            // only try to free if memory was allocated
+            free(buff);
         }
         else
         {
             printf("WARNING: Failed to get \"%s\".\n", request.resource_path);
         }
-        // cleaning up
-        free(buff);
 
         // closing socket
         closesocket(accepted_skt);
