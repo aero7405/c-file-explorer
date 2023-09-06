@@ -6,6 +6,31 @@
 #include "http_response.h"
 #include "file.h"
 
+void url_decode(char *string)
+{
+    char modified_string[PATH_STRING_LENGTH] = ""; // Shouldn't encounter a longer string than this for this application
+    int l = 0;
+    int i = 0;
+    while (< strlen(string))
+    {
+        // TODO: check all possible encodings
+        if (string[i] == '%')
+        {
+            // https://en.wikipedia.org/wiki/Percent-encoding has a table showing all reserved characters and their encoding
+            l++;
+            i += 3; // moving i past the code
+        }
+        else
+        {
+            modified_string[l] = string[i];
+            l++;
+            i++;
+        }
+    }
+    modified_string[l] = '\0';
+    strcpy(string, modified_string);
+}
+
 char *get_param_from_query_string(const char *query_string, const char *param)
 {
     // splitting query string into parameter and value pairs

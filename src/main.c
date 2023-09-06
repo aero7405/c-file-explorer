@@ -8,7 +8,10 @@
 
 int main(void)
 {
-    run_server();
+    // run_server();
+    char s[] = "testing%2Freplace";
+    str_replace(s);
+    printf(s);
     return 0;
 
     // initialising to take minimum amount of memory until needed because it is dynamically reallocated anyway

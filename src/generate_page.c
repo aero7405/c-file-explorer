@@ -2,11 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "generate_page.h"
 #include "file.h"
 #include "http_response.h"
-
-#define RESOURCES_DIR "resources/"
-#define HTML_MAX_SIZE 2048
 
 int generate_page(char **html, HTTP_Response *request)
 {
@@ -27,9 +25,17 @@ int generate_page(char **html, HTTP_Response *request)
     char *curr_dir = get_param_from_query_string(request->query_string, "dir");
     // TODO: make sure to check that curr_dir != NULL
 
-    printf("%s -> %s\n", request->query_string, curr_dir);
-
     // TODO: fill with page contents
+    char **path_dirs = NULL;
+    int path_dirs_len = get_paths_in_dir(&path_dirs, curr_dir);
+
+    printf("%d paths found for dir \"%s\"\n", path_dirs_len, curr_dir);
+    for (int i = 0; i < path_dirs_len; i++)
+    {
+        url_decode(path_dirs[i]);
+        printf("%s\n", path_dirs[i]);
+    }
+
     // TODO: add checking to ensure page never exceeds HTML_MAX_SIZE unless you want segfaults
 
     strcat(*html, "</body></html>");

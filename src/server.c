@@ -11,9 +11,6 @@
 // This *was* needed at one point but linking with Make seems to have removed the need for it
 // #pragma comment(lib, "ws2_32.lib")
 
-#define PORT 80
-#define LOCAL_HOST "127.0.0.1"
-
 // return of 0 is successful, else failed to run
 int run_server()
 {
