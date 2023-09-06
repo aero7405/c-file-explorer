@@ -5,13 +5,11 @@
 
 #include "server.h"
 #include "file.h"
+#include "http_response.h"
 
 int main(void)
 {
-    // run_server();
-    char s[] = "testing%2Freplace";
-    str_replace(s);
-    printf(s);
+    run_server();
     return 0;
 
     // initialising to take minimum amount of memory until needed because it is dynamically reallocated anyway

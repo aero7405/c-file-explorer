@@ -22,18 +22,22 @@ int generate_page(char **html, HTTP_Response *request)
                         <input type = 'submit' value = 'Submit'> \
                     </form>");
 
+    // getting directory to search and decoding any percent encoding
     char *curr_dir = get_param_from_query_string(request->query_string, "dir");
+    url_decode(curr_dir);
     // TODO: make sure to check that curr_dir != NULL
+    // TODO: add default path for invalid or blank curr_dir
 
-    // TODO: fill with page contents
+    // getting results at path
     char **path_dirs = NULL;
     int path_dirs_len = get_paths_in_dir(&path_dirs, curr_dir);
 
+    // TODO: display these results in the page
     printf("%d paths found for dir \"%s\"\n", path_dirs_len, curr_dir);
     for (int i = 0; i < path_dirs_len; i++)
     {
         url_decode(path_dirs[i]);
-        printf("%s\n", path_dirs[i]);
+        printf("\t%s\n", path_dirs[i]);
     }
 
     // TODO: add checking to ensure page never exceeds HTML_MAX_SIZE unless you want segfaults

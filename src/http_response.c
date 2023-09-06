@@ -6,28 +6,48 @@
 #include "http_response.h"
 #include "file.h"
 
+// the index of the value in the keys matchs that in the values
+char PERCENT_ENCODING_LOOKUP_KEYS[22][4] = {"%20", "%21", "%22", "%23", "%24", "%25", "%26", "%27", "%28", "%29", "%2A", "%2B", "%2C", "%2F", "%3A", "%3B", "%3D", "%3F", "%40", "%5B", "%5D"};
+char PERCENT_ENCODING_LOOKUP_VALUES[22] = {' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '/', ':', ';', '=', '?', '@', '[', ']'};
 void url_decode(char *string)
 {
-    char modified_string[PATH_STRING_LENGTH] = ""; // Shouldn't encounter a longer string than this for this application
-    int l = 0;
+    char modified_string[PATH_STRING_LENGTH] = ""; // Shouldn't encounter a longer string than this
+    int modified_string_len = 0;
     int i = 0;
-    while (< strlen(string))
+    while (i < strlen(string))
     {
-        // TODO: check all possible encodings
-        if (string[i] == '%')
+        if (string[i] == '%' && i + 2 < strlen(string)) // ensuring that there is enough space in original string to get a code
         {
             // https://en.wikipedia.org/wiki/Percent-encoding has a table showing all reserved characters and their encoding
-            l++;
-            i += 3; // moving i past the code
+            // getting the 4 digits that could be making up the code
+            char code[4] = {'%', string[i + 1], string[i + 2], '\0'};
+            int idx = 0;
+            // searching lookup for code
+            for (; idx < 22; idx++)
+            {
+                if (strcmp(PERCENT_ENCODING_LOOKUP_KEYS[idx], code) == 0)
+                {
+                    modified_string[modified_string_len] = PERCENT_ENCODING_LOOKUP_VALUES[idx];
+                    break;
+                }
+            }
+            // proceed as if no code was found if code not in lookup
+            if (idx >= 22)
+            {
+                modified_string[modified_string_len] = '%';
+                i++; // moving i past the code
+            }
+            else
+                i += 3; // moving i past the code
         }
         else
         {
-            modified_string[l] = string[i];
-            l++;
-            i++;
+            modified_string[modified_string_len] = string[i];
+            i++; // moving i to the next character
         }
+        modified_string_len++; // only 1 character is appended so we increment by 1
     }
-    modified_string[l] = '\0';
+    modified_string[modified_string_len] = '\0';
     strcpy(string, modified_string);
 }
 
@@ -53,7 +73,8 @@ char *get_param_from_query_string(const char *query_string, const char *param)
             free(param_arr[i].key);
         }
     }
-    free(param_arr);
+    if (param_cnt > 0) // only free if there is memory to free
+        free(param_arr);
     return param_val;
 }
 
