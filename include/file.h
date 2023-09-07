@@ -16,4 +16,6 @@ bool is_only_periods(const char *);
 
 int get_paths_in_dir(char ***, const char *);
 
+void get_parent_dir(char *, const char *);
+
 #endif

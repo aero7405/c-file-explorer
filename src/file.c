@@ -8,6 +8,19 @@
 
 #include "file.h"
 
+void get_parent_dir(char *parent_buff, const char *curr_dir)
+{
+    strncpy(parent_buff, curr_dir, PATH_STRING_LENGTH);
+    for (int i = strnlen(parent_buff, PATH_STRING_LENGTH) - 2; i >= 0; i--) // -2 to skip a triling /
+    {
+        if (parent_buff[i] == '/')
+        {
+            parent_buff[i + 1] = '\0';
+            break;
+        }
+    }
+}
+
 // returns size of buffer assigned to byte_buff (-1 if file failed to open)
 int get_from_file(char **byte_buff, const char *filename)
 {

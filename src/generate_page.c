@@ -50,7 +50,14 @@ int generate_page(char **html, HTTP_Response *request)
     char **path_dirs = NULL;
     int path_dirs_len = get_paths_in_dir(&path_dirs, curr_dir);
 
-    // TODO: inserting back link
+    // inserting back link to parent dir
+    char parent_dir[PATH_STRING_LENGTH];
+    get_parent_dir(parent_dir, curr_dir);
+    if (strncmp(parent_dir, curr_dir, PATH_STRING_LENGTH) != 0)
+    {
+        snprintf(html_segment, PATH_STRING_LENGTH, "<div class = 'path'><a href = 'http://%s/?dir=%s'>%s</a></div>", LOCAL_HOST, parent_dir, "../");
+        strncat(*html, html_segment, HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
+    }
 
     // inserting found paths into page
     for (int i = 0; i < path_dirs_len; i++)
