@@ -5,44 +5,62 @@
 #include "generate_page.h"
 #include "file.h"
 #include "http_response.h"
+#include "server.h"
 
 int generate_page(char **html, HTTP_Response *request)
 {
     *html = (char *)malloc(HTML_MAX_SIZE);
     strcpy(*html, "");
 
-    strcat(*html, "<!DOCTYPE html> \
-                    <head> \
-                        <title>Test Page</title> \
-                        <link rel = 'stylesheet' href = 'css/styles.css'> \
-                    </head> \
-                    <body> \
-                    <form> \
-                        <input type = 'text' id = 'dir' name = 'dir'><br> \
-                        <input type = 'submit' value = 'Submit'> \
-                    </form>");
+    // inserting header for page
+    strcat(*html, "<!DOCTYPE html>"
+                  "<head>"
+                  "  <title>Test Page</title>"
+                  "  <link rel = 'stylesheet' href = 'css/styles.css'>"
+                  "</head>"
+                  "<body>"
+                  "  <form>"
+                  "    <label id = 'dir'>Move to directory:</label>"
+                  "    <input type = 'text' id = 'dir' name = 'dir'>"
+                  "    <input type = 'submit' value = 'Submit'>"
+                  "  </form>");
 
     // getting directory to search and decoding any percent encoding
     char *curr_dir = get_param_from_query_string(request->query_string, "dir");
+    if (curr_dir == NULL)
+    {
+        curr_dir = (char *)malloc((strlen(DEFAULT_DIR) + 1) * sizeof(char));
+        if (curr_dir == NULL)
+            return -1; // memory allocation failed
+        strcpy(curr_dir, DEFAULT_DIR);
+    }
+    // blank should also navigate to default
+    if (strcmp(curr_dir, "") == 0)
+        strcpy(curr_dir, DEFAULT_DIR);
     url_decode(curr_dir);
-    // TODO: make sure to check that curr_dir != NULL
-    // TODO: add default path for invalid or blank curr_dir
 
     // getting results at path
     char **path_dirs = NULL;
     int path_dirs_len = get_paths_in_dir(&path_dirs, curr_dir);
 
-    // TODO: display these results in the page
-    printf("%d paths found for dir \"%s\"\n", path_dirs_len, curr_dir);
+    // inserting found paths into page
+    char path[PATH_STRING_LENGTH];
     for (int i = 0; i < path_dirs_len; i++)
     {
-        url_decode(path_dirs[i]);
-        printf("\t%s\n", path_dirs[i]);
+        printf("%p ", path_dirs[i]);
+        snprintf(path, PATH_STRING_LENGTH, "<a href = 'http://%s/?dir=%s'>%s</a><br>", LOCAL_HOST, path_dirs[i], path_dirs[i]);
+        strcat(*html, path);
+        printf("PASSED\n");
     }
+    printf("\n");
 
-    // TODO: add checking to ensure page never exceeds HTML_MAX_SIZE unless you want segfaults
+    // TODO: add checking to ensure page never exceeds HTML_MAX_SIZE
 
+    // cleaning up html
     strcat(*html, "</body></html>");
+
+    // cleaning up
+    free(curr_dir);
 
     return strlen(*html);
 }

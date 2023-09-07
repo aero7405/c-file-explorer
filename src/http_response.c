@@ -42,7 +42,11 @@ void url_decode(char *string)
         }
         else
         {
-            modified_string[modified_string_len] = string[i];
+            // map '+' to ' '
+            if (string[i] != '+')
+                modified_string[modified_string_len] = string[i];
+            else
+                modified_string[modified_string_len] = ' ';
             i++; // moving i to the next character
         }
         modified_string_len++; // only 1 character is appended so we increment by 1
