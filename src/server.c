@@ -73,7 +73,7 @@ int run_server()
         HTTP_Response request = get_response_data(request_buff, sizeof(request_buff));
 
         // sending requested files
-        char *buff;
+        char *buff = NULL;
         int buff_size = get_resource(&buff, &request);
         // checking valid buffer
         if (buff_size > 0)
