@@ -1,14 +1,13 @@
 # c-file-explorer
 A basic file-explorer that uses HTML hosted on a local server as its GUI.
 
-**Project status:** Initial development
+**Project status:** Active development
 
 ## Features
- - Reading C drive
- - Browsing disc *(unimplemented!)*
- - Hosting its own local server for GUI
+ - Browsing the local disk
+ - Hosting its own local server to display file system as a HTML page viewable from any browser
 
-## Building
+## Building (Windows)
 1. Clone the git repo
 ```
 git clone https://github.com/aero7405/c-file-explorer.git
