@@ -11,6 +11,7 @@ int generate_page(char **html, HTTP_Response *request)
 {
     *html = (char *)malloc(HTML_MAX_SIZE);
     strcpy(*html, "");
+    char html_segment[PATH_STRING_LENGTH];
 
     // inserting header for page
     strncat(*html,
@@ -41,21 +42,24 @@ int generate_page(char **html, HTTP_Response *request)
         strcpy(curr_dir, DEFAULT_DIR);
     url_decode(curr_dir);
 
+    // adding curr_dir at top
+    snprintf(html_segment, PATH_STRING_LENGTH, "<h1>%s</h1>", curr_dir);
+    strncat(*html, html_segment, HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
+
     // getting results at path
     char **path_dirs = NULL;
     int path_dirs_len = get_paths_in_dir(&path_dirs, curr_dir);
 
-    // inserting back link
-    char path[PATH_STRING_LENGTH];
+    // TODO: inserting back link
 
     // inserting found paths into page
     for (int i = 0; i < path_dirs_len; i++)
     {
         if (path_dirs[i][strnlen(path_dirs[i], PATH_STRING_LENGTH) - 1] == '/') // only make path a link if it is a directory
-            snprintf(path, PATH_STRING_LENGTH, "<div class = 'path'><a href = 'http://%s/?dir=%s'>%s</a></div>", LOCAL_HOST, path_dirs[i], path_dirs[i]);
+            snprintf(html_segment, PATH_STRING_LENGTH, "<div class = 'path'><a href = 'http://%s/?dir=%s'>%s</a></div>", LOCAL_HOST, path_dirs[i], path_dirs[i]);
         else
-            snprintf(path, PATH_STRING_LENGTH, "<div class = 'path'>%s<br></div>", path_dirs[i]);
-        strncat(*html, path, HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
+            snprintf(html_segment, PATH_STRING_LENGTH, "<div class = 'path'>%s<br></div>", path_dirs[i]);
+        strncat(*html, html_segment, HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
     }
 
     // cleaning up html
