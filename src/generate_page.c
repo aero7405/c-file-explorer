@@ -13,17 +13,19 @@ int generate_page(char **html, HTTP_Response *request)
     strcpy(*html, "");
 
     // inserting header for page
-    strcat(*html, "<!DOCTYPE html>"
-                  "<head>"
-                  "  <title>Test Page</title>"
-                  "  <link rel = 'stylesheet' href = 'css/styles.css'>"
-                  "</head>"
-                  "<body>"
-                  "  <form>"
-                  "    <label id = 'dir'>Move to directory:</label>"
-                  "    <input type = 'text' id = 'dir' name = 'dir'>"
-                  "    <input type = 'submit' value = 'Submit'>"
-                  "  </form>");
+    strncat(*html,
+            "<!DOCTYPE html>"
+            "<head>"
+            "  <title>Test Page</title>"
+            "  <link rel = 'stylesheet' href = 'css/styles.css'>"
+            "</head>"
+            "<body>"
+            "  <form>"
+            "    <label id = 'dir'>Move to directory:</label>"
+            "    <input type = 'text' id = 'dir' name = 'dir'>"
+            "    <input type = 'submit' value = 'Submit'>"
+            "  </form>",
+            HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
 
     // getting directory to search and decoding any percent encoding
     char *curr_dir = get_param_from_query_string(request->query_string, "dir");
@@ -43,21 +45,21 @@ int generate_page(char **html, HTTP_Response *request)
     char **path_dirs = NULL;
     int path_dirs_len = get_paths_in_dir(&path_dirs, curr_dir);
 
-    // inserting found paths into page
+    // inserting back link
     char path[PATH_STRING_LENGTH];
+
+    // inserting found paths into page
     for (int i = 0; i < path_dirs_len; i++)
     {
-        printf("%p ", path_dirs[i]);
-        snprintf(path, PATH_STRING_LENGTH, "<a href = 'http://%s/?dir=%s'>%s</a><br>", LOCAL_HOST, path_dirs[i], path_dirs[i]);
-        strcat(*html, path);
-        printf("PASSED\n");
+        if (path_dirs[i][strnlen(path_dirs[i], PATH_STRING_LENGTH) - 1] == '/') // only make path a link if it is a directory
+            snprintf(path, PATH_STRING_LENGTH, "<div class = 'path'><a href = 'http://%s/?dir=%s'>%s</a></div>", LOCAL_HOST, path_dirs[i], path_dirs[i]);
+        else
+            snprintf(path, PATH_STRING_LENGTH, "<div class = 'path'>%s<br></div>", path_dirs[i]);
+        strncat(*html, path, HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
     }
-    printf("\n");
-
-    // TODO: add checking to ensure page never exceeds HTML_MAX_SIZE
 
     // cleaning up html
-    strcat(*html, "</body></html>");
+    strncat(*html, "</body></html>", HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
 
     // cleaning up
     free(curr_dir);
