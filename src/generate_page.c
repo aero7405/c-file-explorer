@@ -21,11 +21,13 @@ int generate_page(char **html, HTTP_Response *request)
             "  <link rel = 'stylesheet' href = 'css/styles.css'>"
             "</head>"
             "<body>"
-            "  <form>"
-            "    <label id = 'dir'>Move to directory:</label>"
-            "    <input type = 'text' id = 'dir' name = 'dir'>"
-            "    <input type = 'submit' value = 'Submit'>"
-            "  </form>",
+            "  <div id = 'header'>"
+            "    <div id = 'searchform'>"
+            "      <form>"
+            "        <input type = 'text' id = 'dir' name = 'dir'>"
+            "        <input type = 'submit' value = 'Open'>"
+            "      </form>"
+            "    </div>",
             HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
 
     // getting directory to search and decoding any percent encoding
@@ -43,19 +45,20 @@ int generate_page(char **html, HTTP_Response *request)
     url_decode(curr_dir);
 
     // adding curr_dir at top
-    snprintf(html_segment, PATH_STRING_LENGTH, "<h1>%s</h1>", curr_dir);
+    snprintf(html_segment, PATH_STRING_LENGTH, "<h1 id = 'currdir'>%s</h1></div>", curr_dir);
     strncat(*html, html_segment, HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
 
     // getting results at path
     char **path_dirs = NULL;
     int path_dirs_len = get_paths_in_dir(&path_dirs, curr_dir);
 
+    strncat(*html, "<div id = 'contents'>", HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
     // inserting back link to parent dir
     char parent_dir[PATH_STRING_LENGTH];
     get_parent_dir(parent_dir, curr_dir);
     if (strncmp(parent_dir, curr_dir, PATH_STRING_LENGTH) != 0)
     {
-        snprintf(html_segment, PATH_STRING_LENGTH, "<div class = 'path'><a href = 'http://%s/?dir=%s'>%s</a></div>", LOCAL_HOST, parent_dir, "../");
+        snprintf(html_segment, PATH_STRING_LENGTH, "<div class = 'path' id = 'backlink'><a href = 'http://%s/?dir=%s'>%s</a></div>", LOCAL_HOST, parent_dir, "../");
         strncat(*html, html_segment, HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
     }
 
@@ -70,7 +73,7 @@ int generate_page(char **html, HTTP_Response *request)
     }
 
     // cleaning up html
-    strncat(*html, "</body></html>", HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
+    strncat(*html, "</div></body></html>", HTML_MAX_SIZE - strnlen(*html, HTML_MAX_SIZE));
 
     // cleaning up
     free(curr_dir);
