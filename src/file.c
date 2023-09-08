@@ -34,7 +34,6 @@ int get_from_file(char **byte_buff, const char *filename)
     size_t len = ftell(file_ptr);
     rewind(file_ptr);
     // creating buffer for bytes
-    free(*byte_buff);
     *byte_buff = (char *)malloc(len * sizeof(char));
     // catching failed allocation
     if (*byte_buff == NULL)
