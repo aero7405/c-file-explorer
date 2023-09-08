@@ -16,8 +16,10 @@ int generate_page(char **html, HTTP_Response *request)
     // inserting header for page
     strncat(*html,
             "<!DOCTYPE html>"
+            "<html>"
             "<head>"
             "  <title>Test Page</title>"
+            "  <meta charset = 'utf-8'>"
             "  <link rel = 'stylesheet' href = 'css/styles.css'>"
             "</head>"
             "<body>"
