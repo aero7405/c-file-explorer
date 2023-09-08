@@ -23,6 +23,7 @@ int generate_page(char **html, HTTP_Response *request)
             "  <link rel = 'stylesheet' href = 'css/styles.css'>"
             "</head>"
             "<body>"
+            "<img src = 'images/folder.png' alt = 'open'>" // TEMP: TESTING DISPLAYING IMAGE
             "  <div id = 'header'>"
             "    <div id = 'searchform'>"
             "      <form>"
@@ -45,6 +46,9 @@ int generate_page(char **html, HTTP_Response *request)
     if (strcmp(curr_dir, "") == 0)
         strcpy(curr_dir, DEFAULT_DIR);
     url_decode(curr_dir);
+
+    // TODO: allow files to be opened
+    // TODO: show folder and file icons for each element displayed
 
     // adding curr_dir at top
     snprintf(html_segment, PATH_STRING_LENGTH, "<h1 id = 'currdir'>%s</h1></div>", curr_dir);
