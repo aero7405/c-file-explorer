@@ -63,6 +63,7 @@ int run_server()
         {
             printf("Failed to accept socket with error : %d\n", WSAGetLastError());
             closesocket(accepted_sock);
+            break;
             continue;
         }
 

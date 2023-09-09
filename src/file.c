@@ -22,6 +22,10 @@ void get_parent_dir(char *parent_buff, const char *curr_dir)
 }
 
 // returns size of buffer assigned to byte_buff (-1 if file failed to open)
+// FIXME: there is something here causing a SIGFAULT, I believe it may not be calculating buffers right
+// Suggested fix? Rewrite function, its quite cumbersome anyway
+// Make sure to make it non-reliant on null-termination characters
+// the png has null terminators within it - to see binary in powershell `format-hex PATH | more`
 int get_from_file(char **byte_buff, const char *filename)
 {
     FILE *file_ptr;
