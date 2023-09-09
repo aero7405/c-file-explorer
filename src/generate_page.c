@@ -23,7 +23,7 @@ int generate_page(char **html, HTTP_Response *request)
             "  <link rel = 'stylesheet' href = 'css/styles.css'>"
             "</head>"
             "<body>"
-            "<img src = 'images/folder.png' alt = 'open'>" // TEMP: TESTING DISPLAYING IMAGE
+            // "<img src = 'images/folder.png' alt = 'open'>" // TEMP: TESTING DISPLAYING IMAGE
             "  <div id = 'header'>"
             "    <div id = 'searchform'>"
             "      <form>"
