@@ -1,7 +1,7 @@
 # c-file-explorer
 A basic file-explorer that uses HTML hosted on a local server as its GUI.
 
-**Project status:** Active development
+**Project status:** Abandoned 💀 
 
 ## Features
  - Browsing the local disk
